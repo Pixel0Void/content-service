@@ -1,7 +1,14 @@
 import { Request, Response } from 'express';
+import Hero from '../models/hero';
 
 export const getAllHeroes = async (req: Request, res: Response) => {
-    
+    try {
+        const heroes = await Hero.find({});
+        return res.status(200).json(heroes);
+    } catch (error: any) {
+        console.error('Error fetching heroes: ', error);
+        return res.status(500).json({ message: 'Server error while fetching heroes.', error: error.message });
+    }
 };
 
 export const getUpdates = async (req: Request, res: Response) => {
