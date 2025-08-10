@@ -29,8 +29,18 @@ export const getUpdates = async (req: Request, res: Response) => {
             }
         }
 
+        const deletedHeroIds: string[] = [];
+        for (const clientHero of clientHeroVersions) {
+            if (!dbHeroMap.has(clientHero.id)) {
+                deletedHeroIds.push(clientHero.id);
+            }
+        }
+
         console.log(`Sending ${updatedHeroes.length} updated/new heroes.`);
-        return res.status(200).json({ updatedHeroes: updatedHeroes });
+        return res.status(200).json({
+            updatedHeroes: updatedHeroes,
+            deletedHeroIds: deletedHeroIds
+        });
 
     } catch (error: any) {
         console.error('Error fetching hero updates: ', error);
