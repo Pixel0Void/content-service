@@ -18,8 +18,8 @@ export const getUpdates = async (req: Request, res: Response) => {
     try {
         const updatedHeroes: IHero[] = [];
         const allHeroesInDB = await Hero.find({});
-        const dbHeroMap = new Map<ObjectId, IHero>();
-        allHeroesInDB.forEach(hero => dbHeroMap.set(hero._id as ObjectId, hero));
+        const dbHeroMap = new Map<string, IHero>();
+        allHeroesInDB.forEach(hero => dbHeroMap.set(hero.id, hero));
 
         for (const dbHero of allHeroesInDB) {
             const clientVersion = clientHeroVersions.find(h => h.id === dbHero.id)?.version;
@@ -29,8 +29,18 @@ export const getUpdates = async (req: Request, res: Response) => {
             }
         }
 
+        const deletedHeroIds: string[] = [];
+        for (const clientHero of clientHeroVersions) {
+            if (!dbHeroMap.has(clientHero.id)) {
+                deletedHeroIds.push(clientHero.id);
+            }
+        }
+
         console.log(`Sending ${updatedHeroes.length} updated/new heroes.`);
-        return res.status(200).json({ updatedHeroes: updatedHeroes });
+        return res.status(200).json({
+            updatedHeroes: updatedHeroes,
+            deletedHeroIds: deletedHeroIds
+        });
 
     } catch (error: any) {
         console.error('Error fetching hero updates: ', error);
